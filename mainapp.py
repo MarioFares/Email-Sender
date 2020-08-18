@@ -47,6 +47,8 @@ import os
 import pprint
 import smtplib
 import json
+from colorama import init, Fore, Style
+init(autoreset=False)
 
 
 # noinspection PyUnusedLocal
@@ -73,10 +75,7 @@ class App(cmd.Cmd):
 
         Argument: email
         """
-        try:
-            self.email_info["username"] = arg
-        except Exception as e:
-            print(e)
+        self.email_info["username"] = arg
 
     def do_pass(self, arg):
         """
@@ -84,11 +83,8 @@ class App(cmd.Cmd):
 
         Argument: no argument
         """
-        try:
-            password = getpass.getpass(prompt="Password: ", stream=None)
-            self.email_info["password"] = password
-        except Exception as e:
-            print(e)
+        password = getpass.getpass(prompt="Password: ", stream=None)
+        self.email_info["password"] = password
 
     def do_server(self, arg):
         """
@@ -96,10 +92,7 @@ class App(cmd.Cmd):
 
         Argument: smtp server
         """
-        try:
-            self.email_info["server"] = arg
-        except Exception as e:
-            print(e)
+        self.email_info["server"] = arg
 
     def do_setup(self, arg):
         """
@@ -107,20 +100,17 @@ class App(cmd.Cmd):
 
         Argument: no argument
         """
-        try:
-            if arg == "gmail":
-                self.email_info["server"] = "smtp.gmail.com"
-                self.email_info["port"] = 465
-            elif arg == "outlook":
-                self.email_info["server"] = "smtp-mail.outlook.com"
-                self.email_info["port"] = 587
-            elif arg == "yahoo":
-                self.email_info["server"] = "smtp.mail.yahoo.com"
-                self.email_info["port"] = 465
-            else:
-                print("Specify one of the acceptable inputs:\ngmail\noutlook\nyahoo")
-        except Exception as e:
-            print(e)
+        if arg == "gmail":
+            self.email_info["server"] = "smtp.gmail.com"
+            self.email_info["port"] = 465
+        elif arg == "outlook":
+            self.email_info["server"] = "smtp-mail.outlook.com"
+            self.email_info["port"] = 587
+        elif arg == "yahoo":
+            self.email_info["server"] = "smtp.mail.yahoo.com"
+            self.email_info["port"] = 465
+        else:
+            print(f"{Fore.RED}Specify one of the acceptable inputs:\ngmail\noutlook\nyahoo{Style.RESET_ALL}")
 
     def do_port(self, arg):
         """
@@ -129,9 +119,9 @@ class App(cmd.Cmd):
         Argument: port number
         """
         try:
-            self.email_info["port"] = arg
+            self.email_info["port"] = int(arg)
         except Exception as e:
-            print(e)
+            print(f"{Fore.RED}{e}{Style.RESET_ALL}")
 
     def do_recv(self, arg):
         """
@@ -143,14 +133,11 @@ class App(cmd.Cmd):
         Note:
         Can add multiple receivers.
         """
-        try:
-            array = arg.split()
-            if array[0] == "pop":
-                self.email_info["receiver"].pop(int(array[1]))
-            else:
-                self.email_info["receiver"].append(arg)
-        except Exception as e:
-            print(e)
+        array = arg.split()
+        if array[0] == "pop":
+            self.email_info["receiver"].pop(int(array[1]))
+        else:
+            self.email_info["receiver"].append(arg)
 
     def do_cred(self, arg):
         """
@@ -158,13 +145,11 @@ class App(cmd.Cmd):
 
         Argument: no argument
         """
-        try:
-            user = input("Username: ")
-            password = input("Password: ")
-            self.email_info["username"] = user
-            self.email_info["password"] = password
-        except Exception as e:
-            print(e)
+        user = input(f"{Fore.BLUE}Username: {Fore.GREEN}")
+        password = input(f"{Fore.BLUE}Password: {Fore.GREEN}")
+        self.email_info["username"] = user
+        self.email_info["password"] = password
+        print(Style.RESET_ALL)
 
     # Email
     def do_subj(self, arg):
@@ -173,10 +158,7 @@ class App(cmd.Cmd):
 
         Argument: subject
         """
-        try:
-            self.email_info["subject"] = arg
-        except Exception as e:
-            print(e)
+        self.email_info["subject"] = arg
 
     def do_body(self, arg):
         """
@@ -184,17 +166,14 @@ class App(cmd.Cmd):
 
         Argument: no argument
         """
-        try:
-            msg = ""
-            while True:
-                line = input("> ")
-                if line == "end":
-                    break
-                else:
-                    msg = msg + "\n" + line
-            self.email_info["body"] = msg
-        except Exception as e:
-            print(e)
+        msg = ""
+        while True:
+            line = input("> ")
+            if line == "end":
+                break
+            else:
+                msg = msg + "\n" + line
+        self.email_info["body"] = msg
 
     def do_info(self, arg):
         """
@@ -202,10 +181,9 @@ class App(cmd.Cmd):
 
         Argument: no argument
         """
-        try:
-            pprint.pprint(self.email_info)
-        except Exception as e:
-            print(e)
+        print(Fore.RED)
+        pprint.pprint(self.email_info)
+        print(Style.RESET_ALL)
 
     # Attachments
     def do_img(self, arg):
@@ -217,15 +195,15 @@ class App(cmd.Cmd):
         Argument: no argument
         """
         try:
-            img_path = input("Path to Image: ")
+            img_path = input(f"{Fore.BLUE}Path to Image: {Fore.GREEN}")
             with open(img_path, "rb") as image:
                 image_data = image.read()
                 image_type = imghdr.what(img_path)
                 image_name = image.name
             self.email_info["attachments"].append([image_data, "image", image_type, image_name])
-            print("Image attached successfully.")
+            print(f"Image attached successfully.{Style.RESET_ALL}")
         except Exception as e:
-            print(e)
+            print(f"{Fore.RED}{e}{Style.RESET_ALL}")
 
     def do_doc(self, arg):
         """
@@ -236,24 +214,24 @@ class App(cmd.Cmd):
         Argument: no argument
         """
         try:
-            doc_path = input("Path to Document: ")
+            doc_path = input(f"{Fore.BLUE}Path to Document: {Fore.GREEN}")
             with open(doc_path, "rb") as doc:
                 doc_data = doc.read()
                 doc_name = doc.name
             self.email_info["attachments"].append([doc_data, "application", "octet-stream", doc_name])
-            print("Document attached successfully.")
+            print(f"Document attached successfully.{Style.RESET_ALL}")
         except Exception as e:
-            print(e)
+            print(f"{Fore.RED}{e}{Style.RESET_ALL}")
 
     def do_html(self, arg):
         try:
-            html_path = input("Path to HTML: ")
+            html_path = input(f"{Fore.BLUE}Path to HTML: {Fore.GREEN}")
             with open(html_path, "r") as html:
                 data = html.read()
                 self.email_info["html"] = data
-            print("HTML attached successfully.")
+            print(f"HTML attached successfully.{Style.RESET_ALL}")
         except Exception as e:
-            print(e)
+            print(f"{Fore.RED}{e}{Style.RESET_ALL}")
 
     def do_reset(self, arg):
         """
@@ -275,12 +253,12 @@ class App(cmd.Cmd):
         Argument: no argument
         """
         try:
-            print("Attempting to Login...")
+            print(f"{Fore.BLUE}Attempting to Login...")
             with smtplib.SMTP_SSL(self.email_info["server"], self.email_info["port"]) as server:
                 server.login(self.email_info["username"], self.email_info["password"])
-            print("Login Successful.\nCredentials are fine.")
+            print(f"{Fore.GREEN}Login Successful.\nCredentials are fine.{Style.RESET_ALL}")
         except Exception as e:
-            print(e)
+            print(f"{Fore.RED}{e}{Style.RESET_ALL}")
 
     def do_send(self, arg):
         """
@@ -289,7 +267,7 @@ class App(cmd.Cmd):
         Argument: no argument
         """
         try:
-            print("Logging in...")
+            print(f"{Fore.BLUE}Logging in...")
             msg = email.message.EmailMessage()
             msg["Subject"] = self.email_info["subject"]
             msg["From"] = self.email_info["username"]
@@ -300,11 +278,11 @@ class App(cmd.Cmd):
             msg.add_alternative(self.email_info["html"], subtype="html")
             with smtplib.SMTP_SSL(self.email_info["server"], self.email_info["port"]) as server:
                 server.login(self.email_info["username"], self.email_info["password"])
-                print("Logged in.")
+                print(f"{Fore.GREEN}Logged in.")
                 server.send_message(msg)
-                print("Message sent successfully.")
+                print(f"{Fore.GREEN}Message sent successfully.{Style.RESET_ALL}")
         except Exception as e:
-            print(e)
+            print(f"{Fore.RED}{e}{Style.RESET_ALL}")
 
     # JSON
     def do_save(self, arg):
@@ -314,11 +292,12 @@ class App(cmd.Cmd):
         Argument: no argument
         """
         try:
-            path = input("JSON file path: ")
+            path = input(f"{Fore.BLUE}JSON file path: {Fore.GREEN}")
             with open(path, 'w+') as file:
                 json.dump(self.email_info, file, sort_keys=True, indent=4)
+                print(f"Saved Successfully.{Style.RESET_ALL}")
         except Exception as e:
-            print(e)
+            print(f"{Fore.RED}{e}{Style.RESET_ALL}")
 
     def do_load(self, arg):
         """
@@ -327,11 +306,12 @@ class App(cmd.Cmd):
         Argument: no argument
         """
         try:
-            path = input("JSON file path: ")
+            path = input(f"{Fore.BLUE}JSON file path: {Fore.GREEN}")
             with open(path, 'r+') as file:
                 self.email_info = json.load(file)
+            print(f"Loaded Successfully{Style.RESET_ALL}")
         except Exception as e:
-            print(e)
+            print(f"{Fore.RED}{e}{Style.RESET_ALL}")
 
     # Console
     @staticmethod
@@ -402,5 +382,6 @@ class App(cmd.Cmd):
             print(e)
 
 
-app = App()
-app.cmdloop()
+if __name__ == "__main__":
+    app = App()
+    app.cmdloop()
