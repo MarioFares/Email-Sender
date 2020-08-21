@@ -47,7 +47,13 @@ import os
 import pprint
 import smtplib
 import json
-from colorama import init, Fore, Style
+try:
+    from colorama import init, Fore, Style
+except ModuleNotFoundError as error:
+    print(f"{error}")
+    print("You cannot run this script without this module.")
+    input()
+    exit(1)
 init(autoreset=False)
 
 
