@@ -89,8 +89,12 @@ class App(cmd.Cmd):
 
         Argument: no argument
         """
-        password = getpass.getpass(prompt="Password: ", stream=None)
+        try:
+            password = getpass.getpass(prompt="Password: ", stream=None) # PyPy3 does not accept this
+        except:
+            password = input("Password: ")
         self.email_info["password"] = password
+            
 
     def do_server(self, arg):
         """
@@ -279,9 +283,12 @@ class App(cmd.Cmd):
             msg["From"] = self.email_info["username"]
             msg["To"] = ", ".join(self.email_info["receiver"])
             msg.set_content(self.email_info["body"])
-            for att in self.email_info["attachments"]:
-                msg.add_attachment(att[0], maintype=att[1], subtype=att[2], filename=att[3])
-            msg.add_alternative(self.email_info["html"], subtype="html")
+            if self.email_info["attachments"] != []:
+                for att in self.email_info["attachments"]:
+                    msg.add_attachment(att[0], maintype=att[1], subtype=att[2], filename=att[3])
+            if self.email_info["html"] != '':
+                text_part, attachment_part = msg.iter_parts() # Fixed error mixed/alternative
+                text_part.add_alternative(self.email_info["html"], subtype="html")
             with smtplib.SMTP_SSL(self.email_info["server"], self.email_info["port"]) as server:
                 server.login(self.email_info["username"], self.email_info["password"])
                 print(f"{Fore.GREEN}Logged in.")
